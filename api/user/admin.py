@@ -10,7 +10,7 @@ from api.user.models import User
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     filter_horizontal = ("groups", "user_permissions")
-
+    search_fields = ["username", "email", "first_name", "last_name"]
     list_display = (
         "username",
         "is_active",

@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     "silk",
     "rest_framework",
     "drf_spectacular",
+
+    # Custom Apps
     "api.user.apps.UserConfig",
     "api.clinical.apps.ClinicalConfig",
     "api.inventory.apps.InventoryConfig",
