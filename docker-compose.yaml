@@ -70,29 +70,6 @@ services:
     restart: unless-stopped
     volumes:
       - redis-data:/data
-
-  rabbitmq:
-    <<: *common
-    image: rabbitmq:3.13-management
-    restart: unless-stopped
-    environment:
-        RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
-        RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
-    ports:
-      - "${RABBITMQ_DASHBOARD_PORT:-15672}:15672"
-
-  celery:
-    <<: *common
-    build: .
-    command: make run.celery.prod
-    restart: unless-stopped
-    depends_on:
-      - api
-    volumes:
-      - .:/application
-
   migrations:
     <<: *common
     build: .
@@ -119,5 +96,3 @@ networks:
 volumes:
   postgres-data:
   pgbouncer-data:
-  redis-data:
-  rabbitmq-data:

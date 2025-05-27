@@ -11,3 +11,18 @@ if TYPE_CHECKING:
 class IsStaffPermission(permissions.BasePermission):
     def has_permission(self, request: Request, view: Any) -> bool:  # noqa: ARG002
         return cast(bool, request.user.is_staff)
+
+
+class IsAdmin(permissions.BasePermission):
+    def has_permission(self, request: Request, view: Any) -> bool:
+        return request.user.is_authenticated and request.user.role == "admin"
+
+
+class IsDentist(permissions.BasePermission):
+    def has_permission(self, request: Request, view: Any) -> bool:
+        return request.user.is_authenticated and request.user.role == "dentist"
+
+
+class IsAssistant(permissions.BasePermission):
+    def has_permission(self, request: Request, view: Any) -> bool:
+        return request.user.is_authenticated and request.user.role == "assistant"

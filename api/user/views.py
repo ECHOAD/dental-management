@@ -7,11 +7,14 @@ from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 from api.common.routers import CustomViewRouter
 from api.user import serializers
 from api.user.models import User
-from api.user.permissions import IsStaffPermission
+from api.user.permissions import IsStaffPermission, IsAdmin
+from api.user.serializers import CustomTokenObtainPairSerializer
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -40,4 +43,9 @@ class UserViewSet(
 ):
     serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
-    permission_classes = (IsStaffPermission,)
+    permission_classes = (IsStaffPermission, IsAdmin)
+
+
+@router.register(r"auth/login", name="token_obtain_pair")
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

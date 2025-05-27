@@ -11,6 +11,7 @@ def create_superuser(apps, schema_editor):
         username=getenv("DJANGO_ADMIN_USERNAME", "admin"),
         password=getenv("DJANGO_ADMIN_PASSWORD", "admin"),
         email=getenv("DJANGO_ADMIN_EMAIL", "admin@admin.com"),
+        role="admin",
     )
 
 

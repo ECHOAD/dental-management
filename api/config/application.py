@@ -23,6 +23,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "api.user.apps.UserConfig",
+    "api.clinical.apps.ClinicalConfig",
+    "api.inventory.apps.InventoryConfig",
+    "api.billing.apps.BillingConfig",
 ]
 
 MIDDLEWARE = [
