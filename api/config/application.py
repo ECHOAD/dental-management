@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "api.clinical.apps.ClinicalConfig",
     "api.inventory.apps.InventoryConfig",
     "api.billing.apps.BillingConfig",
+    "api.notification.apps.NotificationsConfig",
 ]
 
 MIDDLEWARE = [
