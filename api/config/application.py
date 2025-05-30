@@ -22,14 +22,20 @@ INSTALLED_APPS = [
     "silk",
     "rest_framework",
     "drf_spectacular",
+    "django_filters",
 
     # Custom Apps
+    "api.common.apps.CommonConfig",
     "api.user.apps.UserConfig",
     "api.clinical.apps.ClinicalConfig",
     "api.inventory.apps.InventoryConfig",
     "api.billing.apps.BillingConfig",
     "api.notification.apps.NotificationsConfig",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

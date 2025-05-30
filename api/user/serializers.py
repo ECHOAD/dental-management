@@ -8,10 +8,14 @@ from api.user.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    groups = serializers.StringRelatedField(many=True, read_only=True)
     class Meta:
         model = User
-        fields = ("id", "username", "email", "password", "role")
+        fields = ("id", "username", "email", "password", "groups")
         extra_kwargs = {"password": {"write_only": True}}  # noqa: RUF012
+
+
+
 
     def create(self, validated_data: dict) -> User:
         user = User.objects.create_user(**validated_data)

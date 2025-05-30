@@ -29,10 +29,10 @@ if USE_SENTRY:
             CeleryIntegration(),
         ],
         # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
+        # of s for performance monitoring.
         traces_sample_rate=TRACES_SAMPLE_RATE,
         # Set profiles_sample_rate to 1.0 to profile 100%
-        # of sampled transactions.
+        # of sampled s.
         # We recommend adjusting this value in production.
         profiles_sample_rate=PROFILE_SAMPLE_RATE,
         # If you wish to associate users to errors (assuming you are using

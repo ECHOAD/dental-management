@@ -45,6 +45,11 @@ urlpatterns = [
     path("", lambda _request: redirect("docs/"), name="home"),
     path("admin/", admin.site.urls),
     path("", include("api.user.urls")),
+    path("", include("api.clinical.urls")),
+    path("", include("api.inventory.urls")),
+    path("", include("api.billing.urls")),
+    path("", include("api.notification.urls")),
+
 ]
 
 if USE_SILK:

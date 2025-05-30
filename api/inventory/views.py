@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 router = CustomViewRouter()
 
 
-@router.register(r"inventory/", name="inventory")
+@router.register(r"inventory/", name="inventory", basename="inventory")
 class InventoryView(GenericAPIView):
     serializer_class = serializers.InventorySerializer
 

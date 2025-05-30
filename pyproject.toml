@@ -1,7 +1,7 @@
 [project]
-name = "python-django-template"
+name = "dental-management"
 version = "0.1.0"
-description = "Python Django Template"
+description = "A Django-based dental management system"
 requires-python = ">=3.12"
 dependencies = [
     "boto3==1.38.23",
@@ -11,6 +11,7 @@ dependencies = [
     "colorlog==6.9.0",
     "dj_database_url==2.3.0",
     "Django==5.2.1",
+    "django-filter==25.1",
     "django-axes[ipware]==8.0.0",
     "django-cors-headers==4.7.0",
     "django-silk==5.3.1",

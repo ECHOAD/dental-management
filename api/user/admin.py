@@ -4,11 +4,30 @@ from typing import Any
 
 from django.contrib import admin
 
+from api.clinical.models import DentistAssistant
 from api.user.models import User
 
 
+class DentistAssistantInline(admin.TabularInline):
+    model = DentistAssistant
+    fk_name = 'assistant'
+    extra = 1
+    verbose_name = "Assigned Dentist"
+    verbose_name_plural = "Assigned Dentists"
+    autocomplete_fields = ['dentist']
+
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def has_add_permission(self, request, obj):
+        return obj and obj.groups.filter(name='Assistant').exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return True
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    inlines = [DentistAssistantInline]
     filter_horizontal = ("groups", "user_permissions")
     search_fields = ["username", "email", "first_name", "last_name"]
     list_display = (
