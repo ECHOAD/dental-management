@@ -4,10 +4,13 @@ from datetime import datetime
 
 from django.db import transaction
 from rest_framework import serializers
-from api.clinical.models import ClinicalConfig, Patient, ProcedureSupply, Procedure, DentistAssistant
+from api.clinical.models import ClinicalConfig, Patient, ProcedureSupply, Procedure, DentistAssistant, TreatmentRecord, \
+    TreatmentUsedSupply
+from api.clinical.services.treatment import TreatmentService
 from api.inventory.models import InventoryItem
 from api.user.models import User
-from api.user.serializers import UserSerializer
+from api.user.serializers import UserSerializer, MinimalUserSerializer
+from api.user.utils import get_dentist_from_user
 
 
 class ClinicalConfigSerializer(serializers.ModelSerializer):
@@ -50,6 +53,12 @@ class PatientSerializer(serializers.ModelSerializer):
             return last_treatment.created_at.date()
         return None
 
+
+class MinimalPatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = ["id", "full_name", "email"]
+
 class InventoryItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = InventoryItem
@@ -72,7 +81,12 @@ class ProcedureSupplySerializer(serializers.ModelSerializer):
 class ProcedureListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Procedure
-        fields = ["id", "name", "price", "description"]  # Sin default_supplies
+        fields = ["id", "name", "price", "description"]
+
+class MinimalProcedureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Procedure
+        fields = ["id", "name", "price"]
 
 class ProcedureDetailSerializer(serializers.ModelSerializer):
     default_supplies = ProcedureSupplySerializer(
@@ -104,5 +118,121 @@ class ProcedureDetailSerializer(serializers.ModelSerializer):
             instance.default_supplies.all().delete()
             for supply_data in supplies_data:
                 ProcedureSupply.objects.create(procedure=instance, **supply_data)
+
+        return instance
+
+
+class TreatmentUsedSupplySerializer(serializers.ModelSerializer):
+    supply = InventoryItemSerializer(read_only=True)
+    supply_id = serializers.PrimaryKeyRelatedField(
+        queryset=InventoryItem.objects.all(),
+        source="supply",
+        write_only=True
+    )
+
+    class Meta:
+        model = TreatmentUsedSupply
+        fields = ["id", "supply", "supply_id", "quantity_used"]
+
+class TreatmentRecordListSerializer(serializers.ModelSerializer):
+    patient = MinimalPatientSerializer(read_only=True)
+    dentist = MinimalUserSerializer(read_only=True)
+    procedure = MinimalProcedureSerializer(read_only=True)
+
+    class Meta:
+        model = TreatmentRecord
+        fields = [
+            "id",
+            "patient",
+            "dentist",
+            "procedure",
+            "clinical_notes",
+            "created_at",
+        ]
+
+
+class TreatmentRecordDetailSerializer(serializers.ModelSerializer):
+    supplies = TreatmentUsedSupplySerializer(many=True, read_only=True, source="used_supplies")
+    patient = MinimalPatientSerializer(read_only=True)
+    dentist = MinimalUserSerializer(read_only=True)
+    procedure = MinimalProcedureSerializer(read_only=True)
+
+    class Meta:
+        model = TreatmentRecord
+        fields = [
+            "id",
+            "dentist",
+            "patient",
+            "procedure",
+            "clinical_notes",
+            "supplies",
+            "created_at",
+        ]
+
+class TreatmentRecordCreateSerializer(serializers.ModelSerializer):
+    used_supplies = TreatmentUsedSupplySerializer(many=True, write_only=True)
+    patient_id = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all(), source="patient", write_only=True, required=True)
+    procedure_id = serializers.PrimaryKeyRelatedField(queryset=Procedure.objects.all(), source="procedure", write_only=True, required=True)
+
+    class Meta:
+        model = TreatmentRecord
+        fields = [
+            "patient_id",
+            "procedure_id",
+            "clinical_notes",
+            "used_supplies",
+        ]
+
+    def validate(self, attrs):
+        user = self.context["request"].user
+        try:
+            attrs["dentist"] = get_dentist_from_user(user)
+        except Exception as e:
+            raise serializers.ValidationError({"detail": str(e)})
+        return attrs
+
+
+
+    def create(self, validated_data):
+        used_supplies_data = validated_data.pop("used_supplies", [])
+        return TreatmentService.create_treatment_with_invoice_and_inventory(
+            validated_data, used_supplies_data
+        )
+
+
+class TreatmentRecordUpdateSerializer(serializers.ModelSerializer):
+    used_supplies = TreatmentUsedSupplySerializer(many=True, write_only=True)
+    patient = MinimalPatientSerializer(read_only=True)
+    dentist = MinimalUserSerializer(read_only=True)
+    procedure = MinimalProcedureSerializer(read_only=True)
+    clinical_notes = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
+
+    class Meta:
+        model = TreatmentRecord
+        fields = [
+            "patient",
+            "dentist",
+            "procedure",
+            "clinical_notes",
+            "used_supplies",
+        ]
+
+    def update(self, instance, validated_data):
+        used_supplies_data = validated_data.pop("used_supplies", [])
+        instance.clinical_notes = validated_data.get("clinical_notes", instance.clinical_notes)
+        instance.save()
+
+        # Update or create used supplies
+        for supply_data in used_supplies_data:
+            supply_id = supply_data.get("supply_id")
+            quantity_used = supply_data.get("quantity_used")
+            if supply_id and quantity_used is not None:
+                TreatmentUsedSupply.objects.update_or_create(
+                    treatment=instance,
+                    supply_id=supply_id,
+                    defaults={"quantity_used": quantity_used}
+                )
 
         return instance

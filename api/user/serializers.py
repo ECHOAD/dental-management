@@ -22,6 +22,12 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class MinimalUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "username", "email")
+        read_only_fields = ("id", "username", "email")
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user: User) -> Token:
@@ -29,4 +35,5 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add custom claims
         groups = list(user.groups.values_list("name", flat=True))
         token["groups"] = groups
+        token["name"] = (user.first_name  + user.last_name) or user.username
         return token

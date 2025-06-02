@@ -1,38 +1,14 @@
-from django.db import transaction
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 from api.clinical.models import TreatmentRecord
-
+from api.clinical.services.treatment import TreatmentService
 from django.apps import apps
 
-Invoice = apps.get_model("billing", "Invoice")
 Inventory = apps.get_model("inventory", "InventoryItem")
 
 
-@transaction.atomic
-@receiver(post_save, sender=TreatmentRecord)
-def create_invoice_for_treatment(sender, instance, created, **kwargs):
-    if not created or instance.invoice:
-        return
+@receiver(pre_delete, sender=TreatmentRecord)
+def delete_invoice_with_treatment(sender, instance, **kwargs):
+    TreatmentService.on_delete_treatment(instance)
 
-    invoice = Invoice.objects.create(
-        patient=instance.patient,
-        treatment_record=instance,
-        total_amount=instance.procedure.price if instance.procedure.price else 0,
-    )
-
-    instance.invoice = invoice
-    instance.save()
-
-
-@transaction.atomic
-@receiver(post_save, sender=TreatmentRecord)
-def update_inventory_for_treatment(sender, instance, created, **kwargs):
-    if not created:
-        return
-
-    for supply in instance.used_supplies.all():
-        inventory_item = Inventory.objects.get(id=supply.supply.id)
-        inventory_item.quantity -= supply.quantity_used
-        inventory_item.save()

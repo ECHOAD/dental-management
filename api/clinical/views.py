@@ -6,14 +6,19 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import filters
+from rest_framework.decorators import action
 
 from django_filters.rest_framework import DjangoFilterBackend
 
+from api.billing.serializers import InvoiceSerializer
 from api.clinical.models import ClinicalConfig, Patient, Procedure
-from api.clinical.serializers import ClinicalConfigSerializer, PatientSerializer, ProcedureListSerializer, ProcedureDetailSerializer
+from api.clinical.serializers import ClinicalConfigSerializer, PatientSerializer, ProcedureListSerializer, \
+    ProcedureDetailSerializer, TreatmentRecordListSerializer, TreatmentRecordDetailSerializer, \
+    TreatmentRecordCreateSerializer, TreatmentRecordUpdateSerializer
 from api.common.pagination import CustomPageNumberPagination
 from api.common.permissions import IsInGroup
 from api.common.routers import CustomViewRouter
+from api.user.utils import get_queryset_for_user
 
 if TYPE_CHECKING:
     from rest_framework.request import Request
@@ -55,8 +60,8 @@ class PatientViewSet(ModelViewSet):
 @router.register(r"clinical/procedures", name="procedures")
 class ProcedureViewSet(ModelViewSet):
     queryset = Procedure.objects.all()
-    permission_classes = [IsAuthenticated, IsInGroup]
     required_groups = ["Admin", "Dentist", "Assistant"]
+    permission_classes = [IsAuthenticated, IsInGroup]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
 
     filterset_fields = {
@@ -73,4 +78,35 @@ class ProcedureViewSet(ModelViewSet):
             return ProcedureListSerializer
         return ProcedureDetailSerializer
 
+
+@router.register(r"clinical/treatments-records", name="treatments")
+class TreatmentRecordViewSet(ModelViewSet):
+    required_groups = ["Admin", "Dentist", "Assistant"]
+    permission_classes = [IsAuthenticated, IsInGroup]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["patient"]
+    search_fields = ["patient__full_name"]
+
+    pagination_class = CustomPageNumberPagination
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return TreatmentRecordDetailSerializer
+        elif self.action == 'create':
+            return TreatmentRecordCreateSerializer
+        elif self.action == 'update' or self.action == 'partial_update':
+            return TreatmentRecordUpdateSerializer
+        return TreatmentRecordListSerializer
+
+    def get_queryset(self):
+        return get_queryset_for_user(self.request.user, "clinical.TreatmentRecord", "dentist")
+
+
+    @action(detail=True, methods=['get'], url_path='invoice')
+    def invoice(self, request, pk=None):
+        treatment = self.get_object()
+
+        invoice = getattr(treatment, "invoice", None)
+        serializer = InvoiceSerializer(invoice)
+        return Response(serializer.data)
 

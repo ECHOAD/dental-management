@@ -46,6 +46,6 @@ class UserViewSet(
     permission_classes = (IsStaffPermission, IsAdmin)
 
 
-@router.register(r"auth/login", name="token_obtain_pair")
+@router.register(r"auth/token", name="token_obtain_pair")
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer

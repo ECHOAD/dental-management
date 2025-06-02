@@ -15,7 +15,7 @@ class CustomOrderingFilterExtension(OpenApiFilterExtension):
             enum = []
 
         return [{
-            'name': 'sortBy',  # 👈 Cambiar el nombre aquí si quieres usar sortBy
+            'name': 'sortBy',
             'required': False,
             'in': 'query',
             'description': 'Sort results by one or more fields. Prefix with "-" for descending.',

@@ -14,5 +14,9 @@ class IsInGroup(BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        allowed_groups = getattr(view, "required_groups", [])
+        if hasattr(view, "get_required_groups") and callable(view.get_required_groups):
+            allowed_groups = view.get_required_groups()
+        else:
+            allowed_groups = getattr(view, "required_groups", [])
+
         return request.user.groups.filter(name__in=allowed_groups).exists()
