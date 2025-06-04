@@ -1,126 +1,180 @@
-# Django API Template
+# DentalCare Pro Backend
+
+**DentalCare Pro Backend** is a modern, scalable and modular Django REST API designed for managing the operations of a dental clinic. It supports patient management, clinical treatments, billing, inventory tracking, role-based authentication, and more. Built with clean architecture principles, this backend integrates powerful tools such as Celery, Redis, Sentry, and JWT for a robust developer and production experience.
 
 ---
 
-## Table of Contents
-- [Feature Highlights](#feature-highlights)
-- [Configuration Guide](#configuration-guide)
-- [Additional Notes](#additional-notes)
-- [Quick Start Guide](#quick-start-guide)
-   - [Setting Up Locally](#setting-up-locally)
-   - [Setting Up with Docker](#setting-up-with-docker)
+## 📚 Table of Contents
+
+- [🔧 Feature Highlights](#-feature-highlights)
+- [⚙️ Configuration Guide](#-configuration-guide)
+- [🚀 Quick Start Guide](#-quick-start-guide)
+  - [🖥 Setting Up Locally](#-setting-up-locally)
+  - [🐳 Setting Up with Docker](#-setting-up-with-docker)
+- [📝 Additional Notes](#-additional-notes)
 
 ---
 
-## Feature Highlights
+## 🔧 Feature Highlights
 
-This Django API Template is designed to be robust, scalable, and secure, with features that cater to modern application development needs. Here's an overview of the advanced features and how they benefit your project:
+This Django API is equipped with everything you need to build and scale a real-world application:
 
-- **[Docker & Docker Compose Integration](https://docs.docker.com/compose/)**: Easily set up and scale your application using Docker containers, ensuring consistent environments across development and production.
+- **🛠 Docker & Docker Compose**  
+  Spin up the entire stack locally or in production with consistent environments.
 
-- **[Celery](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html) with [RabbitMQ](https://rabbitmq.com/) and [Redis](https://redis.io/)**: Leverage Celery for asynchronous task processing, using RabbitMQ as a message broker and Redis as a backend for storing results.
+- **📦 Celery with RabbitMQ and Redis** (optional) 
+  Asynchronous background task support for email sending, analytics, etc.
 
-- **[Sentry for Error Tracking](https://sentry.io/)**: Integrate with Sentry for real-time error tracking and monitoring, helping you identify and fix issues rapidly.
+- **🧩 Django Rest Framework (DRF)**  
+  Robust RESTful APIs with full CRUD support, filtering, pagination, and more.
 
-- **[Django Rest Framework (DRF)](https://www.django-rest-framework.org/)**: Use Django Rest Framework for building RESTful APIs, with support for authentication, serialization, and more.
-   - **[DRF Spectacular for OpenAPI](https://drf-spectacular.readthedocs.io/)**: Use DRF Spectacular for OpenAPI documentation, with support for customizing the schema and UI.
-   - **[DRF Simple JWT for Authentication](https://django-rest-framework-simplejwt.readthedocs.io/)**: Use DRF Simple JWT for JSON Web Token authentication, with support for customizing token claims and expiration.
+- **🔐 DRF Simple JWT**  
+  Stateless authentication with access/refresh tokens and custom claims (e.g., role, name).
 
-- **[Django CORS Headers](https://pypi.org/project/django-cors-headers/)**: Use Django CORS Headers for handling Cross-Origin Resource Sharing (CORS) headers, with support for customizing origins.
+- **📑 DRF Spectacular (OpenAPI)**  
+  Generate clean and customizable Swagger documentation for your API.
 
-- **[Django Silk for Profiling](https://pypi.org/project/django-silk/)**: Utilize Django Silk for profiling and monitoring Django applications, offering insights into performance and optimization.
+- **🌐 Django CORS Headers**  
+  Cross-Origin Resource Sharing configured for frontend integration.
 
-- **[Django Axes for Security](https://django-axes.readthedocs.io/)**: Use Django Axes for security, with support for blocking brute force attacks and monitoring login attempts.
+- **📊 Django Silk**  
+  Profiling and performance monitoring for database queries and view logic.
 
-- **[AWS S3 Integration](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html)**: Option to use Amazon S3 for static and media file storage, enhancing scalability and performance.
+- **🛡 Django Axes**  
+  Protection against brute-force login attacks with lockout and logging support.
 
-- **Scalability Options**: Configure workers and threads to optimize performance under different load conditions.
+- **🗃 AWS S3 Support** *(optional)*  
+  Store static and media files in scalable cloud storage.
 
-- **Up-to-Date Dependencies**: All dependencies are up-to-date as of the latest release. Thanks to [Dependabot](https://dependabot.com/).
+- **📈 Sentry Integration**  
+  Real-time error tracking and visibility into production failures.
 
----
+- **🏗 Modular App Design**  
+  Separate apps for `user`, `clinical`, `inventory`, `billing`, `notifications`, etc.
 
-## Configuration Guide
+- **🚦 Soft Delete Support**  
+  Patients and other entities implement soft deletion for safer data handling.
 
-The `.env` file is a central place to manage environment variables. It's pre-configured to work with Docker Compose out of the box, without any changes required for initial setup. However, for production deployment, certain secrets must be updated for security reasons.
-
-1. **Secrets**:
-   - **PostgreSQL, RabbitMQ, Django Secrets**: These are critical for the security of your application. Ensure to replace the placeholder values with strong, unique passwords.
-
-2. **Ports**:
-   - **API Port and RabbitMQ Dashboard Port**: Set these ports according to your infrastructure needs. They are exposed to the host machine.
-
-3. **Performance Tuning**:
-   - **Workers and Threads**: Adjust these values based on your server's capacity and expected load.
-
-4. **Application Settings**:
-   - **Host and Environment**: Set these to match your deployment environment.
-   - **Debug and Logging**: Control debug mode and log levels. Set `DJANGO_DEBUG` to `false` in production.
-   - **Localization**: Configure `LANGUAGE_CODE` and `TIME_ZONE` as per your requirements.
-
-5. **CORS and CSRF Settings**:
-   - Configure these settings to enhance the security of your application by specifying trusted origins.
-
-6. **Database Configuration**:
-   - **Postgres Connection**: Set up the database connection using the `DATABASE_URL` variable.
+- **🔍 Dynamic Filtering & Pagination**  
+  With Django Filters and global ordering/filtering exposed in OpenAPI docs.
 
 ---
 
-## Additional Notes
-- **Security**: Always prioritize security, especially when handling environment variables and secrets.
-- **Scalability**: Adjust the Docker and Celery configurations as your application scales.
-- **Monitoring**: Regularly monitor the performance and health of your application using integrated tools like Sentry and Silk.
+## ⚙️ Configuration Guide
 
-By following this guide and utilizing the advanced features, you'll be able to set up a powerful, efficient, and secure Django API environment. Happy coding!
+All environment configuration is managed via a `.env` file and works seamlessly with Docker Compose or local `uv` setups.
+
+### 🔐 Secrets
+Update the following for production security:
+
+- `DJANGO_SECRET_KEY`
+- `POSTGRES_PASSWORD`
+- `RABBITMQ_DEFAULT_PASS`
+- `DJANGO_ADMIN_PASSWORD`
+
+### 🌍 Host & Ports
+
+- API: `localhost:8010`
+- RabbitMQ Dashboard: `localhost:15672`
+
+### ⚙️ Performance
+You can configure workers and threads via:
+
+```env
+WORKERS=4
+THREADS=16
+```
+
+### 🌐 CORS & CSRF
+Set trusted origins:
+
+```env
+CORS_ALLOWED_ORIGINS=http://localhost:5173
+CSRF_TRUSTED_ORIGINS=http://localhost:5173
+```
+
+### 💾 Database
+PostgreSQL connection via:
+
+```env
+DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+```
 
 ---
 
-## Quick Start Guide
+## 🚀 Quick Start Guide
 
-### Setting Up Locally
+### 🖥 Setting Up Locally
 
-#### Prerequisites
+#### ✅ Prerequisites
 
-- **uv**: Install `uv` by following the instructions in the [official documentation](https://github.com/astral-sh/uv?tab=readme-ov-file#installation).
+- `uv`: install from [https://github.com/astral-sh/uv](https://github.com/astral-sh/uv)
 
-#### 1. Repository Initialization
-   - **Clone the Repository**
+#### 🧩 1. Clone the Repository
 
-#### 2. Install the project dependencies
-   ```bash
-   uv sync --all-extras --dev
-   ```
+```bash
+git clone https://github.com/your-org/dentalcare-backend.git
+cd dentalcare-backend
+```
 
-#### 3. Configuration
-   - **Environment Variables**:
-     - Copy the example environment file:
-       ```bash
-       cp .env.example .env
-       ```
-     - _Note: The API can operate without this step, but configuring the environment variables is recommended for full functionality._
+#### 📦 2. Install dependencies
 
-#### 4. Database Setup
-   - **Run Migrations**:
-     ```bash
-     make migrate
-     ```
+```bash
+uv sync --all-extras --dev
+```
 
-#### 5. Launching the Server
-   - **Start the Local Server**:
-     ```bash
-     make run.server.local
-     ```
+#### ⚙️ 3. Configuration
 
-### Setting Up with Docker
+```bash
+cp .env.example .env
+```
 
-#### 1. Repository Initialization
-   - **Clone the Repository**
+Update any values as needed (especially secrets and ports).
 
-#### 2. Configuration
-   - Follow the steps in the [Configuration Guide](#configuration-guide) to set up the `.env` file.
+#### 🗃 4. Database Setup
 
-#### 3. Docker Compose
-   - **Run Docker Compose**:
-     ```bash
-     docker compose up -d
-     ```
+```bash
+make migrate
+```
+
+#### 🚀 5. Run the Server
+
+```bash
+make run.server.local
+```
+
+---
+
+### 🐳 Setting Up with Docker
+
+#### 🧩 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-org/dentalcare-backend.git
+cd dentalcare-backend
+```
+
+#### ⚙️ 2. Configuration
+
+Make sure your `.env` is properly configured.
+
+#### 🐳 3. Run Docker Compose
+
+```bash
+docker compose up -d
+```
+
+---
+
+## 📝 Additional Notes
+
+- **🔐 Security**: Never commit your `.env` file or secret values to version control.
+- **📈 Monitoring**: Use Sentry and Silk for real-time performance/error insights.
+- **⚙️ Scalability**: Adjust Celery workers and Django threads based on production load.
+- **📚 Documentation**: Visit `/schema/swagger-ui/` or `/schema/redoc/` for full API documentation.
+
+---
+
+## 🙌 Happy Coding!
+
+For any issues or suggestions, feel free to open an issue or contribute to this project.
