@@ -5,7 +5,7 @@ description = "A Django-based dental management system"
 requires-python = ">=3.12"
 dependencies = [
     "boto3==1.38.27",
-    "cachetools==6.0.0",
+    "cachetools==6.2.0",
     "celery==5.5.3",
     "celery-types==0.23.0",
     "colorlog==6.9.0",
